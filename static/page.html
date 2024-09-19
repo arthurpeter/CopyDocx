@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Page</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="document-page">
+    <div id="page-main">
+        <header>
+            <h1>Document Editor</h1>
+        </header>
+        <div id="editor">
+            <textarea id="text-editor" placeholder="Write your text here..."></textarea>
+        </div>
+        <div id="documents-container">
+            <div id="documents">
+                <h2>Documents</h2>
+                <input type="file" id="file-input" multiple>
+                <button onclick="addDocuments()">Add Documents</button>
+                <ul id="file-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="page.js"></script>
+</body>
+</html>
