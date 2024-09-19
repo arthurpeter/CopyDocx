@@ -1,0 +1,18 @@
+[package]
+name = "copydocx"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+warp = "0.3"
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.17"
+futures-util = "0.3"
+pretty_env_logger = "0.5"
+tokio-stream = { version = "0.1.1", features = ["net"] }
+mongodb = "3.1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+dotenv = "0.15"
