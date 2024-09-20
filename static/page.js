@@ -137,3 +137,52 @@ function addDocuments() {
 	// Clear file input to allow adding the same files again
 	fileInput.value = '';
 }
+
+document.getElementById('fileModal').addEventListener("keyup", ({key}) => {
+    if (key === "Enter") {
+        downloadFile();
+    }
+})
+
+// Function to display the modal
+function openModal() {
+	document.getElementById('fileModal').style.display = 'block';
+}
+
+// Function to close the modal
+function closeModal() {
+	document.getElementById('fileModal').style.display = 'none';
+}
+
+// Function to download the file
+function downloadFile() {
+	// Get the text and file name
+	const text = document.getElementById('text-editor').value;
+	const fileName = document.getElementById('fileNameInput').value || 'default.txt';
+
+	// Create a Blob from the text
+	const blob = new Blob([text], { type: 'text/plain' });
+	const url = URL.createObjectURL(blob);
+
+	// Create an anchor element and simulate a click to start the download
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = fileName;
+	document.body.appendChild(a);
+	a.click();
+
+	// Cleanup
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+
+	// Close the modal after downloading
+	closeModal();
+}
+
+// Close the modal if the user clicks outside of it
+window.onclick = function(event) {
+	const modal = document.getElementById('fileModal');
+	if (event.target === modal) {
+		closeModal();
+	}
+}

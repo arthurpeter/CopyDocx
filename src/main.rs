@@ -33,6 +33,10 @@ async fn main() {
 	dotenv::dotenv().ok();
 
 	let mongodb = MongoDB::init().await;
+	if let Err(err) = mongodb.create_ttl_index().await {
+        eprintln!("Failed to create TTL index: {:?}", err);
+        return;
+    }
 	let mongodb_filter = warp::any().map(move || mongodb.clone());
 
 	let rooms = Rooms::default();

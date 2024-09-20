@@ -3,6 +3,7 @@ body, html {
     padding: 0;
     height: 100%;
     font-family: Arial, sans-serif;
+	font-size: 16px;
 }
 
 /* Home Page Styles */
@@ -16,37 +17,37 @@ body, html {
 }
 
 .home-page header h1 {
-    font-size: 3em;
-    margin-bottom: 10px;
-    margin-top: 20px;
+    font-size: 3rem;
+    margin-bottom: 0.625rem;
+    margin-top: 1.25rem;
 }
 
 .home-page #description {
-    font-size: 1.2em;
+    font-size: 1.2rem;
     color: gray;
-    margin-bottom: 60px;
+    margin-bottom: 3.75rem;
 }
 
 .home-page #content {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.625rem;
 }
 
 .home-page #content input {
-    padding: 10px;
-    font-size: 1.2em;
+    padding: 0.625rem;
+    font-size: 1.2rem;
     width: 80%;
-    max-width: 500px;
+    max-width: 31.25rem;
 }
 
 .home-page #content button {
-    padding: 10px 20px;
-    font-size: 1.2em;
+    padding: 0.625rem 1.25rem;
+    font-size: 1.2rem;
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     cursor: pointer;
 }
 
@@ -55,8 +56,8 @@ body, html {
 }
 
 .home-page #info-text {
-    margin-top: 30px;
-    font-size: 1em;
+    margin-top: 1.875rem;
+    font-size: 1rem;
     color: gray;
 }
 
@@ -65,34 +66,34 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    max-width: 800px;
+    padding: 1.25rem;
+    max-width: 50rem;
     margin: auto;
 }
 
 .document-page header h1 {
-    font-size: 2.5em;
-    margin-bottom: 20px;
+    font-size: 2.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .document-page #editor {
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
 }
 
 .document-page #text-editor {
     width: 100%;
-    height: 300px;
-    padding: 10px;
-    font-size: 1em;
-    border: 1px solid #ddd;
-    border-radius: 5px;
+    height: 18.75rem;
+    padding: 0.625rem;
+    font-size: 1rem;
+    border: 0.0625rem solid #ddd;
+    border-radius: 0.3125rem;
     resize: vertical;
 }
 
 .document-page #documents-container {
     width: 100%;
-    max-height: 400px; /* Adjust this value as needed */
+    max-height: 25rem;
     overflow-y: auto; /* Enable vertical scrolling */
 }
 
@@ -102,7 +103,7 @@ body, html {
 }
 
 .document-page #file-input {
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
 }
 
 .document-page #file-list {
@@ -112,16 +113,16 @@ body, html {
 }
 
 .document-page #file-list li {
-    margin: 5px 0;
+    margin: 0.3125rem 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .document-page #file-list li button.delete-button {
-    margin-left: 10px;
-    padding: 5px;
-    font-size: 1.2em; /* Make the 'X' larger */
+    margin-left: 0.625rem;
+    padding: 0.3125rem;
+    font-size: 1.2rem;
     color: black; /* Default text color */
     background: none; /* No background color */
     border: none; /* No border */
@@ -130,25 +131,88 @@ body, html {
 }
 
 .document-page #file-list li button.delete-button:hover {
-    color: red; /* Change text color to red on hover */
+    color: red;
 }
 
 .document-page #file-list li button.delete-button:active {
-    color: darkred; /* Change text color to dark red when pressed */
-    transform: scale(0.9); /* Slightly scale down the button on press */
+    color: darkred;
+    transform: scale(0.9);
 }
 
 .document-page button {
-    padding: 10px 20px;
-    font-size: 1em;
+    padding: 0.625rem 1.25rem;
+    font-size: 1rem;
     background-color: #007bff;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 0.3125rem;
     cursor: pointer;
 }
 
 .document-page button:hover {
     background-color: #0056b3;
+}
+
+.document-page .download-btn {
+    padding: 0.3125rem 0.9375rem;
+    font-size: 0.9rem;
+    background-color: grey;
+    color: white;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.document-page .download-btn:hover {
+    background-color: black;
+    color: white;
+}
+
+/* Modal styling */
+.modal {
+	display: none; /* Hidden by default */
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+	background-color: white;
+	margin: 15% auto;
+	padding: 1.25rem;
+    border: 0.0625rem solid #888;
+    width: 18.75rem;
+	text-align: center;
+	box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+	color: #aaa;
+	float: right;
+	font-size: 28px;
+	font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+	color: black;
+	cursor: pointer;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 600px) {
+    .document-page #text-editor {
+        height: 15rem; /* Adjust text editor height for smaller screens */
+    }
+
+    .document-page .download-btn {
+        width: 100%;
+        padding: 0.625rem; /* Slightly larger padding for touch interaction */
+    }
 }
 
