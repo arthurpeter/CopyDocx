@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Page</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body class="document-page">
     <div id="page-main">
@@ -14,6 +14,7 @@
         <div id="editor">
             <textarea id="text-editor" placeholder="Write your text here..."></textarea>
         </div>
+		<button class="download-btn" onclick="openModal()">Download Text</button>
         <div id="documents-container">
             <div id="documents">
                 <h2>Documents</h2>
@@ -21,6 +22,16 @@
                 <button onclick="addDocuments()">Add Documents</button>
                 <ul id="file-list"></ul>
             </div>
+        </div>
+    </div>
+
+	<!-- Modal for file name input -->
+    <div id="fileModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Input file name</h2>
+            <input type="text" id="fileNameInput" placeholder="Enter file name">
+            <button onclick="downloadFile()">Download</button>
         </div>
     </div>
 
