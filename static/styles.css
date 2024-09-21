@@ -208,6 +208,7 @@ body, html {
 @media (max-width: 600px) {
     .document-page #text-editor {
         height: 15rem; /* Adjust text editor height for smaller screens */
+		width: 95%;
     }
 
     .document-page .download-btn {
