@@ -110,32 +110,58 @@ function initializeWebSocket(path, editor) {
 function addDocuments() {
 	const fileInput = document.getElementById('file-input');
 	const fileList = document.getElementById('file-list');
+	const errorMessage = document.getElementById('error-message');
+
+    // Reset the error message
+    errorMessage.textContent = '';
+	errorMessage.classList.remove('fade-out');
+	errorMessage.style.transition = 'none';
+	errorMessage.style.opacity = '1';
+	errorMessage.offsetHeight;
+    errorMessage.style.transition = '';
 
 	// Check if files were selected
 	if (fileInput.files.length === 0) return;
 
-	// Iterate over selected files
-	for (const file of fileInput.files) {
-		const listItem = document.createElement('li');
-		listItem.textContent = file.name;
+	// Check if more than one file was selected
+    if (fileInput.files.length > 1) {
+        errorMessage.textContent = 'Please select only one file!';
+        setTimeout(() => {
+            errorMessage.classList.add('fade-out');
+        }, 4000); // Fade out after 4 seconds
+        return;
+    }
 
-		// Create a delete button
-		const deleteButton = document.createElement('button');
-		deleteButton.textContent = '×'; // Unicode for 'X'
-		deleteButton.className = 'delete-button';
-		deleteButton.onclick = () => {
-			listItem.remove(); // Remove the list item
-		};
+	// Clear existing documents
+	fileList.innerHTML = '';
 
-		// Append the button to the list item
-		listItem.appendChild(deleteButton);
+	// Get the first selected file
+	const file = fileInput.files[0];
 
-		// Append the list item to the file list
-		fileList.appendChild(listItem);
-	}
+	// Create a list item
+	const listItem = document.createElement('li');
 
-	// Clear file input to allow adding the same files again
-	fileInput.value = '';
+	// Create a download link
+	const downloadLink = document.createElement('a');
+	downloadLink.textContent = file.name;
+	downloadLink.href = URL.createObjectURL(file);
+	downloadLink.download = file.name;
+
+	// Create a delete button
+	const deleteButton = document.createElement('button');
+	deleteButton.textContent = '×'; // Unicode for 'X'
+	deleteButton.className = 'delete-button';
+	deleteButton.onclick = () => {
+		listItem.remove(); // Remove the list item
+		URL.revokeObjectURL(downloadLink.href); // Revoke the object URL
+	};
+
+	// Append the link and button to the list item
+	listItem.appendChild(downloadLink);
+	listItem.appendChild(deleteButton);
+
+	// Append the list item to the file list
+	fileList.appendChild(listItem);
 }
 
 document.getElementById('fileModal').addEventListener("keyup", ({key}) => {
