@@ -1,13 +1,13 @@
-use mongodb::{Client, options::*, Collection, bson::doc, IndexModel};
+use mongodb::{Client, options::*, Collection, IndexModel, bson::{doc, Binary, DateTime}};
 use serde::{Deserialize, Serialize};
 use std::env;
-use bson::DateTime;
 
 // Define the structure of the data to be saved in MongoDB
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct SaveData {
     pub path: String,
     pub text: String,
+	pub file: Option<Binary>,
 	pub updated_at: DateTime,
 }
 
@@ -31,22 +31,32 @@ impl MongoDB {
     }
 
     // Function to save data to MongoDB
-    pub async fn save_data(&self, path: &str, text: &str) -> mongodb::error::Result<()> {
+    pub async fn save_data(&self, path: &str, text: Option<&str>, file: Option<Vec<u8>>) -> mongodb::error::Result<()> {
 		let filter = doc!("path": path);
 		let existing_document = self.collection.find_one(filter.clone()).await?;
 
 		let current_time = DateTime::now();
 
+		let file_binary = file.map(|f| Binary { subtype: bson::spec::BinarySubtype::Generic, bytes: f });
+
 		if let Some(_) = existing_document {
-			let update = doc! { "$set": { 
-                "text": text.to_string(),
-                "updated_at": current_time,
-            }};
+			let update = if let Some(text) = text {
+                doc! { "$set": { 
+                    "text": text.to_string(),
+                    "updated_at": current_time,
+                }}
+            } else {
+                doc! { "$set": { 
+                    "file": file_binary,
+                    "updated_at": current_time,
+                }}
+            };
 			self.collection.update_one(filter, update).await?;
 		} else  {
 			let data = SaveData {
 				path: path.to_string(),
-				text: text.to_string(),
+				text: text.unwrap_or("").to_string(),
+				file: file_binary,
 				updated_at: current_time,
 			};
 			self.collection.insert_one(data).await?;
@@ -55,10 +65,10 @@ impl MongoDB {
         Ok(())
     }
 
-	pub async fn retrieve_data(&self, path: &str) -> mongodb::error::Result<Option<String>> {
+	pub async fn retrieve_data(&self, path: &str) -> mongodb::error::Result<Option<SaveData>> {
         let filter = doc! { "path": path };
         if let Some(document) = self.collection.find_one(filter).await? {
-            Ok(Some(document.text))
+            Ok(Some(document))
         } else {
             Ok(None)
         }

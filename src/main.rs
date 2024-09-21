@@ -50,12 +50,12 @@ async fn main() {
             ws.on_upgrade(move |socket| user_connected(socket, path, rooms))
         });
 
-	let save = warp::path("save")
+	let save_text = warp::path("save_text")
         .and(warp::post())
         .and(warp::body::json())
 		.and(mongodb_filter.clone())
         .and_then(|body: HashMap<String, String>, mongodb: MongoDB| async move  {
-            handle_save(body, mongodb).await
+            handle_save_text(body, mongodb).await
         });
 
 	let load = warp::path("load")
@@ -79,7 +79,7 @@ async fn main() {
         });
 
 	let routes = static_files.or(fallback);
-	let routes = chat.or(load).or(save).or(routes).recover(handle_rejection);
+	let routes = chat.or(load).or(save_text).or(routes).recover(handle_rejection);
 	
 	println!("Server running on port 8000");
     // Start the warp server
@@ -165,14 +165,14 @@ async fn user_disconnected(my_id: usize, path: &str, rooms: &Rooms) {
     }
 }
 
-async fn handle_save(
+async fn handle_save_text(
     body: HashMap<String, String>, 
     mongodb: MongoDB
 ) -> Result<warp::reply::Json, warp::Rejection> {
     let text = body.get("text").unwrap_or(&"".to_string()).clone();
     let path = body.get("path").unwrap_or(&"".to_string()).clone();
 
-    match mongodb.save_data(&path, &text).await {
+    match mongodb.save_data(&path, Some(&text), None).await {
         Ok(_) => {
             println!("Saved text for path '{}': {}", path, text);
             Ok(warp::reply::json(&format!("Saved text for path '{}'", path)))
@@ -186,9 +186,9 @@ async fn handle_save(
 
 async fn handle_load(path: String, mongodb: MongoDB) -> Result<warp::reply::Json, warp::Rejection> {
     match mongodb.retrieve_data(&path).await {
-        Ok(Some(text)) => {
-            println!("Loaded text for path '{}': {}", path, text);
-            Ok(warp::reply::json(&text))
+        Ok(Some(data)) => {
+            println!("Loaded text for path '{}': {}", path, data.text);
+            Ok(warp::reply::json(&data.text))
         }
         Ok(_) => {
             println!("No text found for path '{}'", path);

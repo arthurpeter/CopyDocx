@@ -66,7 +66,7 @@ function initializeWebSocket(path, editor) {
 		};
 
 		// Send the text to the server
-		fetch('/save', {
+		fetch('/save_text', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ function initializeWebSocket(path, editor) {
 	
 		// Use sendBeacon to ensure the data is sent even if the page is closing
 		const blob = new Blob([JSON.stringify(saveData)], { type: 'application/json' });
-		navigator.sendBeacon('/save', blob);
+		navigator.sendBeacon('/save_text', blob);
 	
 	});
 }
