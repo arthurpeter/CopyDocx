@@ -9,11 +9,11 @@ use std::sync::{
     atomic::{AtomicUsize, Ordering},
     Arc,
 };
+use serde_json::Value;
 use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use tokio::sync::{mpsc, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use warp::ws::{Message, WebSocket};
-
 use db::MongoDB;
 use copydocx::{CustomError, handle_rejection};
 
@@ -58,6 +58,16 @@ async fn main() {
             handle_save_text(body, mongodb).await
         });
 
+	let save_file = warp::path("save_file")
+		.and(warp::post())
+		.and(warp::body::json())
+        .and(mongodb_filter.clone())
+        .and_then(|body: Value, mongodb: MongoDB| async move {
+            let file = body["file"].as_array().map(|arr| arr.iter().map(|v| v.as_u64().unwrap() as u8).collect::<Vec<u8>>());
+            let path = body["path"].as_str().unwrap().to_string();
+            handle_save_file(file, path, mongodb).await
+        });
+
 	let load = warp::path("load")
 	.and(warp::get())
 	.and(warp::path::param::<String>()) // Expecting a path parameter
@@ -79,7 +89,7 @@ async fn main() {
         });
 
 	let routes = static_files.or(fallback);
-	let routes = chat.or(load).or(save_text).or(routes).recover(handle_rejection);
+	let routes = chat.or(load).or(save_text).or(save_file).or(routes).recover(handle_rejection);
 	
 	println!("Server running on port 8000");
     // Start the warp server
@@ -176,6 +186,32 @@ async fn handle_save_text(
         Ok(_) => {
             println!("Saved text for path '{}': {}", path, text);
             Ok(warp::reply::json(&format!("Saved text for path '{}'", path)))
+        }
+        Err(err) => {
+            eprintln!("Failed to save data: {:?}", err);
+            Err(warp::reject::custom(CustomError::from_mongo_error(err)))
+        }
+    }
+}
+
+async fn handle_save_file(
+	file: Option<Vec<u8>>,
+	path: String,
+	mongodb: MongoDB
+) -> Result<impl warp::Reply, warp::Rejection> {
+	// Check if the file size is over 1MB
+    if let Some(ref file_data) = file {
+        const MAX_FILE_SIZE: usize = 1 * 1024 * 1024; // 1MB in bytes
+        if file_data.len() > MAX_FILE_SIZE {
+            eprintln!("File size exceeds 1MB for path '{}'", path);
+            return Ok(warp::reply::json(&serde_json::json!({ "success": false, "error": "File size exceeds 1MB" })));
+        }
+    }
+	
+	match mongodb.save_data(&path, None, file).await {
+        Ok(_) => {
+            println!("Saved file for path '{}'", path);
+            Ok(warp::reply::json(&serde_json::json!({ "success": true })))
         }
         Err(err) => {
             eprintln!("Failed to save data: {:?}", err);
