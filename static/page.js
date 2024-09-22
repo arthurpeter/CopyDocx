@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
     const path = window.location.pathname.substring(1);
-    console.log("Path:", path);
 
     // Fetch the saved text from the server
     fetch(`/load/${path}`)
@@ -132,11 +131,59 @@ function addDocuments() {
         return;
     }
 
-	// Clear existing documents
-	fileList.innerHTML = '';
-
 	// Get the first selected file
 	const file = fileInput.files[0];
+
+	// Check if the file size exceeds 1MB
+    if (file.size > 1048576) {
+        errorMessage.textContent = 'File size must be less than 1MB!';
+        setTimeout(() => {
+            errorMessage.classList.add('fade-out');
+        }, 4000);
+        return;
+    }
+
+	const path = window.location.pathname.substring(1);
+
+	const reader = new FileReader();
+	reader.onload = function(event) {
+		const arrayBuffer = event.target.result;
+		const fileContent = new Uint8Array(arrayBuffer);
+
+		const saveData = {
+			file: Array.from(fileContent), // Convert Uint8Array to Array
+			path: path // Include the path in the save request
+		};
+
+		// Send the file content and path to the server as JSON
+		fetch('/save_file', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(saveData), // Send the data directly
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.success) {
+				console.log('File uploaded successfully');
+			} else {
+				errorMessage.textContent = 'File upload failed!';
+				setTimeout(() => {
+					errorMessage.classList.add('fade-out');
+				}, 4000);
+			}
+		})
+		.catch(error => {
+			console.error('Save error:', error);
+		});
+	};
+
+	// Read the file as an ArrayBuffer
+	reader.readAsArrayBuffer(file);
+
+	// Clear existing documents
+	fileList.innerHTML = '';
 
 	// Create a list item
 	const listItem = document.createElement('li');
@@ -152,8 +199,26 @@ function addDocuments() {
 	deleteButton.textContent = '×'; // Unicode for 'X'
 	deleteButton.className = 'delete-button';
 	deleteButton.onclick = () => {
-		listItem.remove(); // Remove the list item
-		URL.revokeObjectURL(downloadLink.href); // Revoke the object URL
+		fetch('/save_file', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ file: null, path: path }),
+		})
+		.then(response => response.json())
+		.then(data => {
+			if (data.success) {
+				console.log('File deleted successfully');
+				listItem.remove(); // Remove the list item
+				URL.revokeObjectURL(downloadLink.href); // Revoke the object URL
+			} else {
+				console.error('File deletion failed');
+			}
+		})
+		.catch(error => {
+			console.error('Delete error:', error);
+		});
 	};
 
 	// Append the link and button to the list item
