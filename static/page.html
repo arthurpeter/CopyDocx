@@ -11,6 +11,7 @@
         <header>
             <h1>Document Editor</h1>
         </header>
+		<div id="loadingMessage">Loading Editor...</div>
         <div id="editor">
             <textarea id="text-editor" placeholder="Write your text here..."></textarea>
         </div>
@@ -20,7 +21,7 @@
                 <h2>Documents</h2>
 				<small class="disclaimer">Note: The maximum file size allowed is 1MB.</small>
                 <input type="file" id="file-input" multiple>
-                <button onclick="addDocuments()">Add Documents</button>
+                <button onclick="addDocuments()">Add Document</button>
                 <ul id="file-list"></ul>
 				<div id="error-message"></div>
             </div>

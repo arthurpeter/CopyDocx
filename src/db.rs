@@ -25,7 +25,7 @@ impl MongoDB {
 
         // Replace `your_database` and `your_collection` with actual names
         let db = client.database("copydocx");
-        let collection = db.collection::<SaveData>("text_boxes");
+        let collection = db.collection::<SaveData>("pageData");
 
         MongoDB { collection }
     }
