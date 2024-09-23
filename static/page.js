@@ -24,6 +24,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeWebSocket(path, editor) {
 	const socket = new WebSocket("ws://" + window.location.host + "/chat/" + path);
+	let lastSentText = '';
+
+	// Disable the editor for the first 3 seconds
+    editor.disabled = true;
+	loadingMessage.style.display = 'block';
+    setTimeout(() => {
+        editor.disabled = false;
+		loadingMessage.style.display = 'none';
+    }, 3000);
 
 	socket.onopen = () => {
 		console.log("WebSocket connection established:", path);
@@ -41,14 +50,12 @@ function initializeWebSocket(path, editor) {
 	editor.addEventListener('input', () => {
 		const text = editor.value;
 		socket.send(text);
-		console.log('sent: ', text);
 	});
 
 	// Listen for messages from the WebSocket server
 	socket.onmessage = (event) => {
 		const receivedText = event.data;
 		editor.value = receivedText; // Update the editor with the received text
-		console.log('Received the text: ', receivedText);
 	};
 
 	let typingTimer; // Timer identifier
@@ -59,11 +66,18 @@ function initializeWebSocket(path, editor) {
 		// Get the current text from the editor
 		const text = editor.value;
 
+		if (text === lastSentText) {
+			return;
+		}
+	
 		const saveData = {
 			text: text,
 			path: path // Include the path in the save request
 		};
-
+	
+		// Resend the data if it wasn't saved when another user entered.
+		socket.send(text);
+	
 		// Send the text to the server
 		fetch('/save_text', {
 			method: 'POST',
@@ -75,9 +89,10 @@ function initializeWebSocket(path, editor) {
 		.then(response => response.json())
 		.then(data => {
 			console.log('Save successful:', data);
+			lastSentText = text; // Update the last sent text
 		})
 		.catch(error => {
-			console.error('Save error:', error);
+			console.error('Error saving text:', error);
 		});
 	}
 	
@@ -90,9 +105,13 @@ function initializeWebSocket(path, editor) {
 		typingTimer = setTimeout(doneTyping, doneTypingInterval);
 	});
 
-	window.addEventListener('beforeunload', (event) => {
+	window.addEventListener('beforeunload', () => {
 		// Send the text to the server before unloading
 		const text = editor.value;
+
+		if (text === lastSentText) {
+			return;
+		}
 		
 		const saveData = {
 			text: text,

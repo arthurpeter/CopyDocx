@@ -76,6 +76,11 @@ body, html {
     margin-bottom: 1.25rem;
 }
 
+.document-page #loadingMessage {
+	display: none; /* Initially hidden */
+	color: #707070;
+}
+
 .document-page #editor {
     width: 100%;
     margin-bottom: 1.25rem;
@@ -174,6 +179,22 @@ body, html {
     color: white;
 }
 
+/* Info Page Styles */
+.info-page h1 {
+	text-align: center;
+}
+
+.info-page body {
+	max-width: 37rem;
+    margin: 0 auto;
+}
+
+.info-page #content {
+	max-width: 50rem;
+	margin: auto;
+	padding: 1.25rem;
+}
+
 /* Modal styling */
 .modal {
 	display: none; /* Hidden by default */
@@ -225,6 +246,26 @@ body, html {
     font-size: 0.7em; /* Slightly smaller font size */
     margin-bottom: 0.5rem; /* Add some space below the disclaimer */
 	display: block;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: transparent;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+	font-size: 0.8em; /* Smaller font size */
+}
+
+footer a {
+    color: grey; /* Initial grey color for links */
+	text-decoration: none;
+}
+
+footer a:hover {
+    color: #007BFF; /* Change color to blue on hover */
+	text-decoration: none;
 }
 
 /* Media query for smaller screens */
