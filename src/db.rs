@@ -1,4 +1,10 @@
-use mongodb::{Client, options::*, Collection, IndexModel, bson::{doc, Binary, DateTime}};
+use mongodb::{
+    Client, 
+    options::{ClientOptions, IndexOptions}, 
+    Collection, 
+    IndexModel, 
+    bson::{doc, Binary, DateTime}
+};
 use serde::{Deserialize, Serialize};
 use std::env;
 

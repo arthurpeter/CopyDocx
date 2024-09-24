@@ -99,10 +99,10 @@ async fn main() {
 	let routes = static_files.or(fallback);
 	let routes = chat.or(load).or(save_text).or(save_file).or(routes).recover(handle_rejection);
 	
-	println!("Server running on port 8000");
+	//println!("Server running HTTP");
     // Start the warp server
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 8000))
+        .run(([0, 0, 0, 0], 80))
         .await;
 }
 
@@ -110,7 +110,7 @@ async fn user_connected(ws: WebSocket, path: String, rooms: Rooms) {
     // Generate a unique ID for this user
     let my_id = NEXT_USER_ID.fetch_add(1, Ordering::Relaxed);
 
-    eprintln!("new chat user (ID: {}, Path: {})", my_id, path);
+    //eprintln!("new chat user (ID: {}, Path: {})", my_id, path);
 
     // Split the socket into a sender and receiver
     let (mut user_ws_tx, mut user_ws_rx) = ws.split();
@@ -139,7 +139,7 @@ async fn user_connected(ws: WebSocket, path: String, rooms: Rooms) {
         let msg = match result {
             Ok(msg) => msg,
             Err(e) => {
-                eprintln!("websocket error (ID: {}): {}", my_id, e);
+                eprintln!("websocket error: {}", e);
                 break;
             }
         };
@@ -172,7 +172,7 @@ async fn user_message(my_id: usize, msg: Message, path: &str, rooms: &Rooms) {
 }
 
 async fn user_disconnected(my_id: usize, path: &str, rooms: &Rooms) {
-    eprintln!("good bye user (ID: {}, Path: {})", my_id, path);
+    //eprintln!("good bye user (ID: {}, Path: {})", my_id, path);
 
     let mut rooms = rooms.write().await;
     if let Some(room) = rooms.get_mut(path) {
@@ -192,7 +192,7 @@ async fn handle_save_text(
 
     match mongodb.save_data(&path, Some(&text), None, &"").await {
         Ok(_) => {
-            println!("Saved text for path '{}': {}", path, text);
+            //println!("Saved text for path '{}': {}", path, text);
             Ok(warp::reply::json(&format!("Saved text for path '{}'", path)))
         }
         Err(err) => {
@@ -219,7 +219,7 @@ async fn handle_save_file(
 	
 	match mongodb.save_data(path, None, file, file_name).await {
         Ok(_) => {
-            println!("Saved file '{}' for path '{}'", file_name, path);
+            //println!("Saved file '{}' for path '{}'", file_name, path);
             Ok(warp::reply::json(&serde_json::json!({ "success": true })))
         }
         Err(err) => {
@@ -232,7 +232,7 @@ async fn handle_save_file(
 async fn handle_load(path: String, mongodb: MongoDB) -> Result<warp::reply::Json, warp::Rejection> {
     match mongodb.retrieve_data(&path).await {
         Ok(Some(data)) => {
-            println!("Loaded text for path '{}': {}", path, data.text);
+            //println!("Loaded text for path '{}': {}", path, data.text);
             let file_data = data.file.map(|binary| binary.bytes); // Transform Binary to Vec<u8>
             let response = LoadResponse {
                 text: data.text,
@@ -242,7 +242,7 @@ async fn handle_load(path: String, mongodb: MongoDB) -> Result<warp::reply::Json
             Ok(warp::reply::json(&response))
         }
         Ok(_) => {
-            println!("No data found for path '{}'", path);
+            //println!("No data found for path '{}'", path);
             let response = LoadResponse {
                 text: "".to_string(),
                 file: None,

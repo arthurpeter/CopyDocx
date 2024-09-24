@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             const editor = document.getElementById('text-editor');
             editor.value = data.text; // Set the retrieved text into the editor
-            console.log('Loaded text:', data.text);
 
 			// Check if file exists and add it to the file list
             if (data.file) {
@@ -133,7 +132,6 @@ function initializeWebSocket(path, editor) {
 		})
 		.then(response => response.json())
 		.then(data => {
-			console.log('Save successful:', data);
 			lastSentText = text; // Update the last sent text
 		})
 		.catch(error => {
@@ -230,9 +228,7 @@ function addDocuments() {
 		})
 		.then(response => response.json())
 		.then(data => {
-			if (data.success) {
-				console.log('File uploaded successfully');
-			} else {
+			if (data.error) {
 				errorMessage.textContent = 'File upload failed!';
 				setTimeout(() => {
 					errorMessage.classList.add('fade-out');
@@ -274,7 +270,6 @@ function addDocuments() {
 		.then(response => response.json())
 		.then(data => {
 			if (data.success) {
-				console.log('File deleted successfully');
 				listItem.remove(); // Remove the list item
 				URL.revokeObjectURL(downloadLink.href); // Revoke the object URL
 			} else {
