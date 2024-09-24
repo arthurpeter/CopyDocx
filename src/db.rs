@@ -7,6 +7,7 @@ use std::env;
 pub struct SaveData {
     pub path: String,
     pub text: String,
+	pub file_name: String,
 	pub file: Option<Binary>,
 	pub updated_at: DateTime,
 }
@@ -31,7 +32,7 @@ impl MongoDB {
     }
 
     // Function to save data to MongoDB
-    pub async fn save_data(&self, path: &str, text: Option<&str>, file: Option<Vec<u8>>) -> mongodb::error::Result<()> {
+    pub async fn save_data(&self, path: &str, text: Option<&str>, file: Option<Vec<u8>>, file_name: &str) -> mongodb::error::Result<()> {
 		let filter = doc!("path": path);
 		let existing_document = self.collection.find_one(filter.clone()).await?;
 
@@ -48,6 +49,7 @@ impl MongoDB {
             } else {
                 doc! { "$set": { 
                     "file": file_binary,
+					"file_name": file_name.to_string(),
                     "updated_at": current_time,
                 }}
             };
@@ -57,6 +59,7 @@ impl MongoDB {
 				path: path.to_string(),
 				text: text.unwrap_or("").to_string(),
 				file: file_binary,
+				file_name: file_name.to_string(),
 				updated_at: current_time,
 			};
 			self.collection.insert_one(data).await?;

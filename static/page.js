@@ -11,8 +11,53 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             const editor = document.getElementById('text-editor');
-            editor.value = data; // Set the retrieved text into the editor
-            console.log('Loaded text:', data);
+            editor.value = data.text; // Set the retrieved text into the editor
+            console.log('Loaded text:', data.text);
+
+			// Check if file exists and add it to the file list
+            if (data.file) {
+                const fileList = document.getElementById('file-list');
+                const fileName = data.file_name || 'loaded-file?'; // You can set a default name or retrieve it from metadata if available
+                const fileBlob = new Blob([new Uint8Array(data.file)], { type: 'application/octet-stream' });
+
+                // Create a list item
+                const listItem = document.createElement('li');
+
+                // Create a download link
+                const downloadLink = document.createElement('a');
+                downloadLink.textContent = fileName;
+                downloadLink.href = URL.createObjectURL(fileBlob);
+                downloadLink.download = fileName;
+
+                // Create a delete button
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = '×'; // Unicode for 'X'
+                deleteButton.className = 'delete-button';
+                deleteButton.onclick = () => {
+                    fetch('/save_file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ file: null, file_name: '', path: path }),
+                    })
+                    .then(response => response.json())
+                    .then(() => {
+                        // Remove the list item from the file list
+                        fileList.removeChild(listItem);
+                    })
+                    .catch(error => {
+                        console.error('Error deleting file:', error);
+                    });
+                };
+
+                // Append the download link and delete button to the list item
+                listItem.appendChild(downloadLink);
+                listItem.appendChild(deleteButton);
+
+                // Append the list item to the file list
+                fileList.appendChild(listItem);
+            }
 
             // Proceed with WebSocket connection and other operations after fetch completes
             initializeWebSocket(path, editor);
@@ -171,6 +216,7 @@ function addDocuments() {
 
 		const saveData = {
 			file: Array.from(fileContent), // Convert Uint8Array to Array
+			file_name: file.name,
 			path: path // Include the path in the save request
 		};
 
@@ -223,7 +269,7 @@ function addDocuments() {
 			headers: {
 				'Content-Type': 'application/json',
 			},
-			body: JSON.stringify({ file: null, path: path }),
+			body: JSON.stringify({ file: null, file_name: '', path: path }),
 		})
 		.then(response => response.json())
 		.then(data => {
