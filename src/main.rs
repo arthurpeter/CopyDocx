@@ -14,6 +14,7 @@ use futures_util::{SinkExt, StreamExt, TryFutureExt};
 use tokio::sync::{mpsc, RwLock};
 use tokio_stream::wrappers::UnboundedReceiverStream;
 use warp::ws::{Message, WebSocket};
+use serde::Serialize;
 use db::MongoDB;
 use copydocx::{CustomError, handle_rejection};
 
@@ -26,6 +27,12 @@ static NEXT_USER_ID: AtomicUsize = AtomicUsize::new(1);
 /// - Value is a sender of `warp::ws::Message`
 type Rooms = Arc<RwLock<HashMap<String, HashMap<usize, mpsc::UnboundedSender<Message>>>>>; 
 
+#[derive(Serialize)]
+struct LoadResponse {
+    text: String,
+    file: Option<Vec<u8>>, // Assuming the file is binary data
+	file_name: String,
+}
 
 #[tokio::main]
 async fn main() {
@@ -64,8 +71,9 @@ async fn main() {
         .and(mongodb_filter.clone())
         .and_then(|body: Value, mongodb: MongoDB| async move {
             let file = body["file"].as_array().map(|arr| arr.iter().map(|v| v.as_u64().unwrap() as u8).collect::<Vec<u8>>());
-            let path = body["path"].as_str().unwrap().to_string();
-            handle_save_file(file, path, mongodb).await
+            let path = body["path"].as_str().unwrap();
+			let file_name = body["file_name"].as_str().unwrap();
+            handle_save_file(file, file_name, path, mongodb).await
         });
 
 	let load = warp::path("load")
@@ -182,7 +190,7 @@ async fn handle_save_text(
     let text = body.get("text").unwrap_or(&"".to_string()).clone();
     let path = body.get("path").unwrap_or(&"".to_string()).clone();
 
-    match mongodb.save_data(&path, Some(&text), None).await {
+    match mongodb.save_data(&path, Some(&text), None, &"").await {
         Ok(_) => {
             println!("Saved text for path '{}': {}", path, text);
             Ok(warp::reply::json(&format!("Saved text for path '{}'", path)))
@@ -196,7 +204,8 @@ async fn handle_save_text(
 
 async fn handle_save_file(
 	file: Option<Vec<u8>>,
-	path: String,
+	file_name: &str,
+	path: &str,
 	mongodb: MongoDB
 ) -> Result<impl warp::Reply, warp::Rejection> {
 	// Check if the file size is over 1MB
@@ -208,9 +217,9 @@ async fn handle_save_file(
         }
     }
 	
-	match mongodb.save_data(&path, None, file).await {
+	match mongodb.save_data(path, None, file, file_name).await {
         Ok(_) => {
-            println!("Saved file for path '{}'", path);
+            println!("Saved file '{}' for path '{}'", file_name, path);
             Ok(warp::reply::json(&serde_json::json!({ "success": true })))
         }
         Err(err) => {
@@ -224,11 +233,22 @@ async fn handle_load(path: String, mongodb: MongoDB) -> Result<warp::reply::Json
     match mongodb.retrieve_data(&path).await {
         Ok(Some(data)) => {
             println!("Loaded text for path '{}': {}", path, data.text);
-            Ok(warp::reply::json(&data.text))
+            let file_data = data.file.map(|binary| binary.bytes); // Transform Binary to Vec<u8>
+            let response = LoadResponse {
+                text: data.text,
+                file: file_data,
+				file_name: data.file_name,
+            };
+            Ok(warp::reply::json(&response))
         }
         Ok(_) => {
-            println!("No text found for path '{}'", path);
-            Ok(warp::reply::json(&"".to_string())) // Return empty if not found
+            println!("No data found for path '{}'", path);
+            let response = LoadResponse {
+                text: "".to_string(),
+                file: None,
+				file_name: "".to_string(),
+            };
+            Ok(warp::reply::json(&response))
         }
         Err(err) => {
             eprintln!("Failed to retrieve data: {:?}", err);
