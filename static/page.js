@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeWebSocket(path, editor) {
 	const socket = new WebSocket("ws://" + window.location.host + "/chat/" + path);
-	let lastSentText = '';
+	let lastSentText = editor.value;
 
 	// Disable the editor for the first 3 seconds
     editor.disabled = true;
