@@ -5,7 +5,7 @@ FROM rust:latest AS builder
 WORKDIR /usr/src/app
 
 # Copy the Cargo.toml, Cargo.lock, and .env files
-COPY Cargo.toml Cargo.lock .env ./
+COPY Cargo.toml Cargo.lock ./
 
 # Copy the source code
 COPY src ./src
