@@ -29,9 +29,6 @@ COPY --from=builder /usr/src/app/target/release/copydocx .
 # Copy static files
 COPY --from=builder /usr/src/app/static /usr/src/app/static
 
-# Copy the .env file
-COPY --from=builder /usr/src/app/.env .env
-
 # Expose the port the application runs on
 EXPOSE 80
 
