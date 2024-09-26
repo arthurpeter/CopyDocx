@@ -5,7 +5,7 @@ FROM rust:latest AS builder
 WORKDIR /usr/src/app
 
 # Copy the Cargo.toml, Cargo.lock, and .env files
-COPY Cargo.toml Cargo.lock .env ./
+COPY Cargo.toml Cargo.lock ./
 
 # Copy the source code
 COPY src ./src
@@ -28,9 +28,6 @@ COPY --from=builder /usr/src/app/target/release/copydocx .
 
 # Copy static files
 COPY --from=builder /usr/src/app/static /usr/src/app/static
-
-# Copy the .env file
-COPY --from=builder /usr/src/app/.env .env
 
 # Expose the port the application runs on
 EXPOSE 80
