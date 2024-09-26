@@ -1,8 +1,11 @@
+const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
+const baseUrl = `${protocol}//${window.location.host}`;
+
 document.addEventListener('DOMContentLoaded', function() {
     const path = window.location.pathname.substring(1);
 
     // Fetch the saved text from the server
-    fetch(`/load/${path}`)
+    fetch(`${baseUrl}/load/${path}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -33,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 deleteButton.textContent = '×'; // Unicode for 'X'
                 deleteButton.className = 'delete-button';
                 deleteButton.onclick = () => {
-                    fetch('/save_file', {
+                    fetch(`${baseUrl}/save_file`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -67,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeWebSocket(path, editor) {
-	const socket = new WebSocket("ws://" + window.location.host + "/chat/" + path);
+	const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/chat/${path}`;
+    const socket = new WebSocket(wsUrl);
 	let lastSentText = editor.value;
 
 	// Disable the editor for the first 3 seconds
@@ -123,7 +128,7 @@ function initializeWebSocket(path, editor) {
 		socket.send(text);
 	
 		// Send the text to the server
-		fetch('/save_text', {
+		fetch(`${baseUrl}/save_text`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -163,7 +168,7 @@ function initializeWebSocket(path, editor) {
 	
 		// Use sendBeacon to ensure the data is sent even if the page is closing
 		const blob = new Blob([JSON.stringify(saveData)], { type: 'application/json' });
-		navigator.sendBeacon('/save_text', blob);
+		navigator.sendBeacon(`${baseUrl}/save_text`, blob);
 	
 	});
 }
@@ -219,7 +224,7 @@ function addDocuments() {
 		};
 
 		// Send the file content and path to the server as JSON
-		fetch('/save_file', {
+		fetch(`${baseUrl}/save_file`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -260,7 +265,7 @@ function addDocuments() {
 	deleteButton.textContent = '×'; // Unicode for 'X'
 	deleteButton.className = 'delete-button';
 	deleteButton.onclick = () => {
-		fetch('/save_file', {
+		fetch(`${baseUrl}/save_file`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
