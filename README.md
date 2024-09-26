@@ -55,6 +55,7 @@ To run CopyDocx locally, you need to have Rust and Cargo installed. Follow these
 CopyDocx uses environment variables for configuration. Create a `.env` file in the root directory and add the necessary variables. For example:
 ```env
 MONGODB_URI=mongodb://localhost:27017
+```
 
 ### Building and Running with Docker
 To build and run CopyDocx using Docker, follow these steps:
