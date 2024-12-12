@@ -4,14 +4,6 @@ const baseUrl = `${protocol}//${window.location.host}`;
 document.addEventListener('DOMContentLoaded', function() {
     const path = window.location.pathname.substring(1);
 
-	// Disable the editor for the first 3 seconds
-    editor.disabled = true;
-	loadingMessage.style.display = 'block';
-    setTimeout(() => {
-        editor.disabled = false;
-		loadingMessage.style.display = 'none';
-    }, 3000);
-
     // Fetch the saved text from the server
     fetch(`${baseUrl}/load/${path}`)
         .then(response => {
@@ -82,6 +74,14 @@ function initializeWebSocket(path, editor) {
     const wsUrl = `${wsProtocol}//${window.location.host}/chat/${path}`;
     const socket = new WebSocket(wsUrl);
 	let lastSentText = editor.value;
+
+	// Disable the editor for the first 3 seconds
+    editor.disabled = true;
+	loadingMessage.style.display = 'block';
+    setTimeout(() => {
+        editor.disabled = false;
+		loadingMessage.style.display = 'none';
+    }, 3000);
 
 	socket.onopen = () => {
 		console.log("WebSocket connection established:", path);
